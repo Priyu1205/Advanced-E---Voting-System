@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    .navbar img {
+      height: 60px;
+    }
+
+    .sidebar {
+      height: 100%;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: -250px;
+      background-color: #343a40;
+      padding-top: 70px;
+      transition: 0.3s;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar a {
+      padding: 12px 20px;
+      text-decoration: none;
+      font-size: 16px;
+      color: #f8f9fa;
+      display: block;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+
+    .openbtn {
+      margin: 1rem 0;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+    }
+
+    .logout-btn {
+      margin-left: auto;
+    }
+
+    #main {
+      transition: margin-left 0.3s;
+      padding: 20px;
+    }
+
+    #main.shifted {
+      margin-left: 250px;
+    }
+
+    .section-content {
+      display: none;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .section-content.active {
+      display: block;
+    }
+
+    .accordion-button {
+      font-weight: bold;
+    }
+
+    .accordion-body ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+
+    .accordion-body a {
+      text-decoration: none;
+      color: #0d6efd;
+    }
+
+    .accordion-body a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar bg-white shadow-sm border-bottom">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="./images.png" alt="Logo" class="me-2">
+        <img src="./Election_Commission_of_India_Logo.svg.png" alt="Logo" class="me-2">
+        <img src="./Aadhaar_Logo.svg.png" alt="Logo" class="me-2">
+        <strong><p style="font-weight: 400;font-size: 30px;">‎ ‎  Advance E-voting System </p></strong> 
+      </a>
+      <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <div id="mySidebar" class="sidebar">
+    <a href="#" onclick="showSection('voterReport')">Voter Report</a>
+    <a href="#" onclick="showSection('electionReport')">Election Report</a>
+    <a href="#" onclick="showSection('candidateDetail')">Candidate Detail</a>
+    <a href="#" onclick="showSection('startElection')">🏁 Start Election</a>
+    <a href="#" onclick="showSection('terminateElection')">❌ Terminate Election</a>
+  </div>
+
+  <!-- Main Content -->
+  <div id="main">
+    <button class="openbtn" onclick="toggleSidebar()">☰ Dashboard</button>
+
+    <div id="voterReport" class="section-content mt-4 active">
+      <h3>Voter Report</h3>
+      <p>Details about voter participation and statistics.</p>
+    </div>
+
+    <div id="electionReport" class="section-content mt-4">
+      <h3>🗳️ All Elections Summary</h3>
+      <div id="electionList" class="mt-3"></div>
+    </div>
+
+    <div id="candidateDetail" class="section-content mt-4">
+        <h3>👥 All Candidate Details</h3>
+        <div id="candidateDetailList" class="mt-3"></div>
+      </div>
+      
+      <script>
+        function renderCandidateDetails() {
+          const elections = JSON.parse(localStorage.getItem("elections") || "[]");
+          const container = document.getElementById("candidateDetailList");
+      
+          if (!elections.length) {
+            container.innerHTML = "<p class='text-muted'>No elections conducted yet.</p>";
+            return;
+          }
+      
+          let content = '';
+          elections.forEach((election, index) => {
+            content += `
+              <div class="border rounded bg-light p-3 mb-4">
+                <h5>${election.type} (${election.status})</h5>
+                <p><strong>Date:</strong> ${election.date}</p>
+                <ul>
+                  ${election.results.map(c => `
+                    <li>
+                      <strong>${c.name}</strong> (${c.party})<br>
+                      DOB: ${c.dob}, Age: ${c.age}
+                    </li>
+                  `).join("")}
+                </ul>
+              </div>
+            `;
+          });
+      
+          container.innerHTML = content;
+        }
+      </script>
+      
+
+    <div id="startElection" class="section-content mt-4">
+      <h3>Start Election</h3>
+      <p>Select the type of election to initiate:</p>
+
+      <div class="accordion" id="electionAccordion">
+        <!-- [accordion items stay the same] -->
+        <!-- National Level -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingNational">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNational">
+              🏛️ National-Level Elections
+            </button>
+          </h2>
+          <div id="collapseNational" class="accordion-collapse collapse show" data-bs-parent="#electionAccordion">
+            <div class="accordion-body">
+              <ul>
+                <li><a href="election.html?type=Lok Sabha Elections (General)">Lok Sabha Elections (General)</a></li>
+                <li><a href="election.html?type=Presidential Elections">Presidential Elections</a></li>
+                <li><a href="election.html?type=Vice Presidential Elections">Vice Presidential Elections</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- State Level -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingState">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseState">
+              🏛️ State-Level Elections
+            </button>
+          </h2>
+          <div id="collapseState" class="accordion-collapse collapse" data-bs-parent="#electionAccordion">
+            <div class="accordion-body">
+              <ul>
+                <li><a href="election.html?type=Vidhan Sabha Elections">Vidhan Sabha Elections</a></li>
+                <li><a href="election.html?type=Vidhan Parishad Elections">Vidhan Parishad Elections</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rajya Sabha -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingRajya">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRajya">
+              🏛️ Rajya Sabha Elections
+            </button>
+          </h2>
+          <div id="collapseRajya" class="accordion-collapse collapse" data-bs-parent="#electionAccordion">
+            <div class="accordion-body">
+              <ul>
+                <li><a href="election.html?type=Rajya Sabha Elections">Rajya Sabha Elections</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Local Body -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingLocal">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLocal">
+              🏘️ Local Body Elections
+            </button>
+          </h2>
+          <div id="collapseLocal" class="accordion-collapse collapse" data-bs-parent="#electionAccordion">
+            <div class="accordion-body">
+              <ul>
+                <li><a href="election.html?type=Urban Local Elections">Urban: Municipal Corporations, Nagar Palikas, Nagar Panchayats</a></li>
+                <li><a href="election.html?type=Rural Local Elections">Rural: Gram Panchayat, Panchayat Samiti, Zilla Parishad</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Terminate Election Section -->
+    <div id="terminateElection" class="section-content mt-4">
+      <h3>❌ Terminate Active Elections</h3>
+      <div id="activeElectionList"></div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+   
+  <script>
+    
+  window.addEventListener('DOMContentLoaded', () => {
+    const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+    const lastActive = localStorage.getItem("adminLastActive");
+    const now = Date.now();
+    const expired = !lastActive || (now - parseInt(lastActive)) > SESSION_TIMEOUT;
+    const notLoggedIn = localStorage.getItem("adminLoggedIn") !== "true";
+
+    if (notLoggedIn || expired) {
+      localStorage.removeItem("adminLoggedIn");
+      localStorage.removeItem("adminLastActive");
+      window.location.replace("admin.html");
+    } else {
+      localStorage.setItem("adminLastActive", now.toString());
+    }
+
+    window.addEventListener("click", () => {
+      localStorage.setItem("adminLastActive", Date.now().toString());
+    });
+  });
+
+
+  
+  // --- Admin Session Validation with Expiry ---
+  const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  const lastActive = localStorage.getItem("adminLastActive");
+  const now = Date.now();
+  const expired = !lastActive || (now - parseInt(lastActive)) > SESSION_TIMEOUT;
+  const notLoggedIn = localStorage.getItem("adminLoggedIn") !== "true";
+
+  if (notLoggedIn || expired) {
+    localStorage.removeItem("adminLoggedIn");
+    localStorage.removeItem("adminLastActive");
+
+    // 👇 Force full page reload to prevent back-button cache access
+    window.location.replace("admin.html");
+  } else {
+    localStorage.setItem("adminLastActive", now.toString());
+  }
+
+  window.addEventListener("click", () => {
+    localStorage.setItem("adminLastActive", Date.now().toString());
+  });
+
+
+    const sidebar = document.getElementById("mySidebar");
+    const main = document.getElementById("main");
+
+    function toggleSidebar() {
+      sidebar.classList.toggle("open");
+      main.classList.toggle("shifted");
+    }
+
+    function showSection(sectionId) {
+  document.querySelectorAll(".section-content").forEach(section => {
+    section.classList.remove("active");
+  });
+  document.getElementById(sectionId).classList.add("active");
+
+  if (sectionId === "electionReport") renderElections();
+  if (sectionId === "terminateElection") renderActiveElections();
+  if (sectionId === "candidateDetail") renderCandidateDetails(); // <-- add this line
+}
+
+
+    function logout() {
+      if (confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("adminLoggedIn");
+        window.location.href = "admin.html";
+      }
+    }
+
+    function renderElections() {
+      const elections = JSON.parse(localStorage.getItem("elections") || "[]");
+      const container = document.getElementById("electionList");
+      if (!elections.length) {
+        container.innerHTML = "<p class='text-muted'>No elections conducted yet.</p>";
+        return;
+      }
+
+      container.innerHTML = elections.map(e => `
+        <div class="border rounded bg-light p-3 mb-3">
+          <h5>${e.type} (${e.status})</h5>
+          <p><strong>Date:</strong> ${e.date}</p>
+          <ul>
+            ${e.results.map(r => `<li>${r.name} (${r.party}) - <strong>${r.votes}</strong> votes</li>`).join("")}
+          </ul>
+          <button class="btn btn-sm btn-outline-primary" onclick="downloadElectionReport('${e.id}')">Download Report</button>
+        </div>
+      `).join("");
+    }
+
+    function downloadElectionReport(id) {
+      const elections = JSON.parse(localStorage.getItem("elections") || "[]");
+      const e = elections.find(el => el.id === id);
+      if (!e) return alert("Election not found.");
+
+      const lines = [
+        `Election Report`,
+        `=================`,
+        `Election ID: ${e.id}`,
+        `Type: ${e.type}`,
+        `Date: ${e.date}`,
+        `Status: ${e.status}`,
+        ``,
+        `Candidates:`,
+        ...e.results.map(c => `- ${c.name} (${c.party}) - Votes: ${c.votes}`)
+      ];
+      const blob = new Blob([lines.join("\n")], { type: 'text/plain' });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `election_report_${e.id}.txt`;
+      a.click();
+    }
+
+    function renderActiveElections() {
+      const elections = JSON.parse(localStorage.getItem("elections") || "[]");
+      const active = elections.filter(e => e.status === "Active");
+      const container = document.getElementById("activeElectionList");
+
+      if (!active.length) {
+        container.innerHTML = "<p class='text-muted'>No active elections currently running.</p>";
+        return;
+      }
+
+      container.innerHTML = active.map(e => `
+        <div class="p-3 border rounded bg-light mb-2">
+          <strong>${e.type}</strong> | Date: ${e.date}
+          <button class="btn btn-danger btn-sm float-end" onclick="terminateElectionById('${e.id}')">Terminate</button>
+        </div>
+      `).join("");
+    }
+
+    function terminateElectionById(id) {
+      const elections = JSON.parse(localStorage.getItem("elections") || "[]");
+      const index = elections.findIndex(e => e.id === id);
+      if (index !== -1) {
+        elections[index].status = "Terminated";
+        localStorage.setItem("elections", JSON.stringify(elections));
+        alert("Election terminated.");
+        renderActiveElections();
+        renderElections();
+      }
+    }
+  </script>
+</body>
+</html>

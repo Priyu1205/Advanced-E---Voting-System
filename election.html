@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Start Election</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+<div class="container mt-5 p-4 bg-white rounded shadow">
+  <a href="./admin_work.html" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+  <h2 id="electionTitle">Election</h2>
+  <div class="alert alert-info" id="electionInfo">Loading election details...</div>
+
+  <!-- Candidate Form -->
+  <div>
+    <h4>Add Candidate</h4>
+    <div class="row g-3">
+      <div class="col-md-3"><input type="text" id="candidateName" class="form-control" placeholder="Candidate Name"></div>
+      <div class="col-md-3"><input type="text" id="partyName" class="form-control" placeholder="Party Name"></div>
+      <div class="col-md-2">
+        <input type="date" id="candidateDob" class="form-control">
+        <small id="ageDisplay" class="text-muted"></small>
+      </div>
+      <div class="col-md-3">
+        <input type="file" id="partyLogo" accept=".jpg,.jpeg,.png" class="form-control" />
+        <small class="text-muted">Party Logo (jpg, png)</small>
+      </div>
+      <div class="col-md-1 d-grid"><button class="btn btn-primary" onclick="addOrUpdateCandidate()">Add</button></div>
+    </div>
+    <input type="hidden" id="editIndex" value="-1">
+  </div>
+
+  <!-- Date Selection -->
+  <div class="mt-4">
+    <label for="electionDate">Select Election Date:</label>
+    <input type="date" id="electionDate" class="form-control" required>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="mt-4 d-flex gap-3">
+    <button class="btn btn-success" onclick="startElection()">Start Election</button>
+  </div>
+
+  <!-- Candidate List -->
+  <div id="candidateList" class="mt-4"></div>
+</div>
+
+<script>
+  const electionType = new URLSearchParams(window.location.search).get("type");
+  const titleEl = document.getElementById("electionTitle");
+  const infoEl = document.getElementById("electionInfo");
+  const electionId = `election_${Date.now()}`;
+  let candidates = [];
+  let electionStatus = "Pending";
+
+  if (electionType) {
+    titleEl.textContent = electionType;
+    infoEl.innerHTML = `<strong>${electionType}</strong> selected. Fill the form to add candidates and start the election.`;
+  }
+
+  document.getElementById("candidateDob").max = new Date().toISOString().split("T")[0];
+  document.getElementById("candidateDob").addEventListener("input", function () {
+    const dob = new Date(this.value);
+    const age = calculateAge(dob);
+    document.getElementById("ageDisplay").textContent = `Age: ${age} years`;
+  });
+
+  function calculateAge(dob) {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+  }
+
+  function addOrUpdateCandidate() {
+    const name = document.getElementById("candidateName").value.trim();
+    const party = document.getElementById("partyName").value.trim();
+    const dobValue = document.getElementById("candidateDob").value;
+    const logoInput = document.getElementById("partyLogo");
+    const editIndex = parseInt(document.getElementById("editIndex").value);
+
+    if (!name || !party || !dobValue) return alert("Please fill all fields.");
+    const age = calculateAge(new Date(dobValue));
+    if (age < 21) return alert("Candidate must be at least 21 years old.");
+
+    let logoData = null;
+    if (logoInput.files.length > 0) {
+      const file = logoInput.files[0];
+      if (!["image/jpeg", "image/png"].includes(file.type)) return alert("Invalid image format!");
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        logoData = e.target.result;
+        saveCandidate(name, party, dobValue, age, logoData, editIndex);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      saveCandidate(name, party, dobValue, age, null, editIndex);
+    }
+  }
+
+  function saveCandidate(name, party, dob, age, logo, index) {
+    const candidate = { name, party, dob, age, logo };
+    if (index >= 0) {
+      candidates[index] = candidate;
+    } else {
+      candidates.push(candidate);
+    }
+    document.getElementById("editIndex").value = -1;
+    displayCandidates();
+    clearForm();
+  }
+
+  function displayCandidates() {
+    const list = document.getElementById("candidateList");
+    list.innerHTML = "<h5>Candidate List</h5>";
+    candidates.forEach((c, i) => {
+      list.innerHTML += `
+        <div class="p-3 border rounded mb-2 bg-light d-flex align-items-center">
+          <div style="width:50px; height:50px; margin-right:15px;">
+            ${c.logo ? `<img src="${c.logo}" alt="Logo" style="max-width:100%; max-height:100%;">` : `<div class="text-muted small">No Logo</div>`}
+          </div>
+          <div class="flex-grow-1">
+            <strong>${i + 1}. ${c.name}</strong><br>
+            Party: ${c.party} | DOB: ${c.dob} | Age: ${c.age}
+          </div>
+          <div>
+            <button class="btn btn-warning btn-sm me-2" onclick="editCandidate(${i})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="removeCandidate(${i})">Remove</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  function editCandidate(i) {
+    const c = candidates[i];
+    document.getElementById("candidateName").value = c.name;
+    document.getElementById("partyName").value = c.party;
+    document.getElementById("candidateDob").value = c.dob;
+    document.getElementById("editIndex").value = i;
+    document.getElementById("ageDisplay").textContent = `Age: ${c.age} years`;
+  }
+
+  function removeCandidate(i) {
+    if (confirm("Remove this candidate?")) {
+      candidates.splice(i, 1);
+      displayCandidates();
+    }
+  }
+
+  function clearForm() {
+    document.getElementById("candidateName").value = '';
+    document.getElementById("partyName").value = '';
+    document.getElementById("candidateDob").value = '';
+    document.getElementById("ageDisplay").textContent = '';
+    document.getElementById("partyLogo").value = '';
+  }
+
+  function startElection() {
+    const date = document.getElementById("electionDate").value;
+    if (!date || candidates.length === 0) return alert("Select a date and add candidates.");
+
+    const results = candidates.map(c => ({ ...c, votes: Math.floor(Math.random() * 1000) + 1 }));
+    const electionData = {
+      id: electionId,
+      type: electionType,
+      date,
+      status: "Active",
+      results
+    };
+
+    const all = JSON.parse(localStorage.getItem("elections") || "[]");
+    all.push(electionData);
+    localStorage.setItem("elections", JSON.stringify(all));
+    alert("Election started.");
+  }
+
+  function terminateElection() {
+    const all = JSON.parse(localStorage.getItem("elections") || "[]");
+    const found = all.find(e => e.id === electionId);
+    if (found) {
+      found.status = "Terminated";
+      localStorage.setItem("elections", JSON.stringify(all));
+      alert("Election terminated.");
+    } else {
+      alert("No active election found.");
+    }
+  }
+
+  function downloadReport() {
+    const all = JSON.parse(localStorage.getItem("elections") || "[]");
+    const found = all.find(e => e.id === electionId);
+    if (!found) return alert("No election data found.");
+    const lines = [
+      `Election Report`,
+      `=================`,
+      `Election ID: ${found.id}`,
+      `Type: ${found.type}`,
+      `Date: ${found.date}`,
+      `Status: ${found.status}`,
+      ``,
+      `Candidates:`,
+      ...found.results.map(c => `- ${c.name} (${c.party}) - Votes: ${c.votes}`)
+    ];
+    const blob = new Blob([lines.join("\n")], { type: 'text/plain' });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `election_report_${found.id}.txt`;
+    a.click();
+  }
+</script>
+</body>
+</html>
