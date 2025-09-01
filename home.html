@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Identity Verification Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ✅ Thank You Message (Hidden by Default) -->
+  <div id="thankYouMsg" class="alert alert-success text-center mb-0" style="display: none;">
+    ✅ Thank you for casting your vote!
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar bg-white shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="/image/images.png" alt="Logo" width="100" class="me-2">
+        <img src="/image/Election_Commission_of_India_Logo.svg.png" alt="Logo" width="100" class="me-2">
+        <img src="/image/Aadhaar_Logo.svg.png" alt="Logo" width="100" class="me-2">
+        <strong><p style="font-weight: 600;font-size: 30px;">‎ ‎  Advance E-voting System </p></strong> 
+      </a>
+      <a href="/admin/admin.html" class="btn btn-outline-primary">
+        <i class="bi bi-person-gear me-1"></i> Admin
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container d-flex flex-column justify-content-center align-items-center vh-100 text-center">
+    <h1 class="mb-5">Choose a Verification Method</h1>
+    <div class="row g-4 w-100 justify-content-center">
+      <div class="col-md-4">
+        <a href="aadhar.html" class="verification-card shadow-sm p-4 text-decoration-none d-block h-100">
+          <i class="bi bi-fingerprint display-4 mb-3"></i>
+          <h4>Aadhar Verification</h4>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="voter.html" class="verification-card shadow-sm p-4 text-decoration-none d-block h-100">
+          <i class="bi bi-person-vcard display-4 mb-3"></i>
+          <h4>Voter ID Verification</h4>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Thank You Script -->
+  <script>
+    if (localStorage.getItem("showThankYou") === "true") {
+      const msg = document.getElementById("thankYouMsg");
+      msg.style.display = "block";
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        msg.style.display = "none";
+      }, 5000);
+
+      // Remove flag so message only shows once
+      localStorage.removeItem("showThankYou");
+    }
+  </script>
+</body>
+</html>

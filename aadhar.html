@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aadhar Verify API</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
+  <link rel="stylesheet" href="./aadhar.css">
+</head>
+<body>
+  <nav class="navbar bg-white shadow-sm border-bottom">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="/image/images.png" alt="Logo" width="100" class="me-2">
+        <img src="/image/Election_Commission_of_India_Logo.svg.png" alt="Logo" width="100" class="me-2">
+        <img src="/image/Aadhaar_Logo.svg.png" alt="Logo" width="100" class="me-2">
+        <strong>‎ ‎ Aadhar Verify API</strong>
+      </a>
+      <a href="/admin/admin.html" class="btn btn-outline-primary">
+        <i class="bi bi-person-gear me-1"></i> Admin
+      </a>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+
+    <!-- Aadhar Number Input -->
+    <div class="card shadow-sm p-4 col-md-6 mx-auto mb-4">
+      <div class="section-title text-center">Enter Your Aadhar Card Number</div>
+      <div class="input-group mb-2">
+        <span class="input-group-text"><i class="bi bi-fingerprint"></i></span>
+        <input type="text" class="form-control" placeholder="12-digit Aadhar number">
+      </div>
+      <div class="error-text">Example error message</div>
+      <button class="btn btn-danger w-100 mt-3"><i class="bi bi-send me-1"></i>Send OTP</button>
+      <button class="btn btn-danger w-100 mt-2" disabled>
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Sending...
+      </button>
+    </div>
+
+    <!-- OTP Input -->
+    <div class="card shadow-sm p-4 col-md-6 mx-auto mb-4">
+      <div class="section-title text-center">Enter OTP Sent to Registered Mobile</div>
+      <div class="input-group mb-2">
+        <span class="input-group-text"><i class="bi bi-phone"></i></span>
+        <input type="text" class="form-control" placeholder="6-digit OTP">
+      </div>
+      <div class="error-text">Example error message</div>
+      <button class="btn btn-primary w-100 mt-3"><i class="bi bi-shield-check me-1"></i>Verify OTP</button>
+      <button class="btn btn-primary w-100 mt-2" disabled>
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>Verifying...
+      </button>
+    </div>
+
+    <!-- Aadhar Info Display -->
+    <div class="card shadow-sm p-4 col-md-6 mx-auto">
+      <div class="section-title">Aadhar Card Info</div>
+      <div class="info-block d-flex align-items-start gap-3 mb-3">
+        <img src="data:image/jpeg;base64,...[image]" width="85" class="rounded">
+        <div>
+          <div class="fw-bold"><i class="bi bi-fingerprint"></i> 3265 8569 8545</div>
+          <div><strong>Name:</strong> XYZ </div>
+          <div><strong>Gender:</strong> Male</div>
+          <div><strong>DOB:</strong> XX-XX-XXXX</div>
+        </div>
+      </div>
+      <div class="info-block address-block">
+        <div class="fw-bold">Address</div>
+         Pandra, Hehal, Ranchi, Jharkhand 834005
+      </div><br>
+      <a href="./ballot_page.html"> <button class="btn btn-primary w-100 mt-2">
+        <i class="bi"></i>Continue</button></a>
+      <button class="btn btn-outline-primary w-100 mt-4">
+        <i class="bi bi-arrow-repeat me-1"></i>Verify Another Aadhar Card
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

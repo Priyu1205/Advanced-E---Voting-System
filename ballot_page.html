@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vote Now</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .table td, .table th {
+      border: 2px solid #343a40 !important;
+    }
+    .vote-btn {
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: bold;
+      background-color: #fff;
+      color: rgba(0, 123, 255, 0.75);
+      border: 1px solid rgba(0, 123, 255, 0.75);
+      transition: 0.3s ease-in-out;
+      box-shadow: 0 0 0 transparent;
+    }
+    .vote-btn:hover:not(:disabled) {
+      box-shadow: 0 0 12px 2px rgba(0, 123, 255, 0.75);
+      background-color: rgba(0, 123, 255, 0.75);
+      color: white;
+      transform: scale(1.05);
+    }
+    .party-logo {
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar bg-white shadow-sm border-bottom">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="/image/images.png" alt="Logo" width="100" class="me-2">
+        <img src="/image/Election_Commission_of_India_Logo.svg.png" alt="Logo" width="100" class="me-2">
+        <img src="/image/Aadhaar_Logo.svg.png" alt="Logo" width="100" class="me-2">
+      </a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <br><h2 class="text-center mb-4">Please Cast Your Vote</h2>
+
+    <div id="electionDropdownContainer" class="mb-4 text-center"></div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Party Logo</th>
+            <th>Party & Candidate Name</th>
+            <th>Click to Vote</th>
+          </tr>
+        </thead>
+        <tbody id="partyTableBody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const elections = JSON.parse(localStorage.getItem("elections") || "[]");
+    const activeElections = elections.filter(e => e.status === "Active");
+    const electionDropdownContainer = document.getElementById("electionDropdownContainer");
+    const tableBody = document.getElementById("partyTableBody");
+    const alreadyVoted = localStorage.getItem("hasVoted") === "true";
+
+    if (activeElections.length === 0) {
+      electionDropdownContainer.innerHTML = "<div class='alert alert-warning'>No active elections available right now.</div>";
+    } else {
+      const dropdown = document.createElement("select");
+      dropdown.className = "form-select w-50 mx-auto";
+      dropdown.innerHTML = `<option value="">-- Select an Active Election --</option>`;
+
+      activeElections.forEach(e => {
+        dropdown.innerHTML += `<option value="${e.id}">${e.type} (${e.date})</option>`;
+      });
+
+      electionDropdownContainer.appendChild(dropdown);
+
+      dropdown.addEventListener("change", function () {
+        const selectedElection = elections.find(e => e.id === this.value);
+        tableBody.innerHTML = "";
+
+        if (!selectedElection) return;
+
+        selectedElection.results.forEach((candidate, index) => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>
+              ${candidate.logo ? `<img src="${candidate.logo}" alt="Logo" class="party-logo">` : `<div class="text-muted">No Logo</div>`}
+            </td>
+            <td><strong>${candidate.party}</strong><br><small>${candidate.name}</small></td>
+            <td>
+              <button class="vote-btn" onclick="castVote('${candidate.party}')" ${alreadyVoted ? "disabled" : ""}>
+                ${alreadyVoted ? "Already Voted" : "Vote"}
+              </button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+    }
+
+    function castVote(partyName) {
+      if (localStorage.getItem("hasVoted") === "true") {
+        alert("You have already voted!");
+        return;
+      }
+
+      localStorage.setItem("votedParty", partyName);
+      localStorage.setItem("hasVoted", "true");
+      localStorage.setItem("showThankYou", "true"); // ✅ Flag for home.html
+
+      alert("Your vote has been recorded successfully!");
+      window.location.href = "home.html"; // ✅ Redirect to home
+    }
+  </script>
+</body>
+</html>

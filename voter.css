@@ -1,0 +1,56 @@
+
+body {
+  position: relative;
+  min-height: 100vh;
+  z-index: 0;
+}
+
+body::before {
+  content: "";
+  background-image: url('./image/Election_Commission_of_India_Logo.svg.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+}
+
+.card {
+  border: none;
+  border-radius: 16px;
+}
+
+.card .btn {
+  border-radius: 8px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.error-text {
+  font-size: 0.9rem;
+  color: #dc3545;
+}
+
+.navbar-brand img {
+  margin-right: 10px;
+}
+
+.info-block {
+  background-color: #f1f3f5;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.address-block {
+  font-size: 0.95rem;
+}
